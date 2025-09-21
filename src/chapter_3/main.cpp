@@ -1,3 +1,5 @@
+#include <atomic>
+#include <cstdint>
 #include <functional>
 #include <iostream>
 #include <mutex>
@@ -24,9 +26,7 @@ int raceCondition()
             for (int i = 0; i < 100; ++i)
             {
                 std::ostringstream oss;
-
                 oss << "1 " << "2 " << "3 " << "4 " << std::endl;
-
                 std::cout << oss.str();
             }
         });
@@ -37,9 +37,7 @@ int raceCondition()
             for (int i = 0; i < 100; ++i)
             {
                 std::ostringstream oss;
-
                 oss << "5 " << "6 " << "7 " << "8 " << std::endl;
-
                 std::cout << oss.str();
             }
         });
@@ -76,42 +74,37 @@ void synced()
     t2.join();
 }
 
-
-namespace {
+namespace
+{
 
 int result = 0;
 
 };
 
-void setValue(int& result) {
+void setValue(int& result)
+{
 
     std::this_thread::sleep_for(1s);
-    result = 1 + (rand () % 10);
+    result = 1 + (rand() % 10);
 }
 
 void joinable()
 {
     std::thread t1;
 
-    std::cout << "Is t1 joinable? " << t1.joinable()
-              << std::endl;
+    std::cout << "Is t1 joinable? " << t1.joinable() << std::endl;
 
-    std::thread t2([](){
-        std::this_thread::sleep_for(100ms);
-    });
+    std::thread t2([]() { std::this_thread::sleep_for(100ms); });
 
     t1.swap(t2);
 
-    std::cout << "Is t1 joinable? " << t1.joinable()
-              << std::endl;
+    std::cout << "Is t1 joinable? " << t1.joinable() << std::endl;
 
-    std::cout << "Is t2 joinable? " << t2.joinable()
-              << std::endl;
+    std::cout << "Is t2 joinable? " << t2.joinable() << std::endl;
 
     t1.join();
 
-    std::cout << "Is t1 joinable? " << t1.joinable()
-              << std::endl;
+    std::cout << "Is t1 joinable? " << t1.joinable() << std::endl;
 }
 
 void deamonThread()
@@ -128,7 +121,7 @@ class JThreadWrapper
 {
 public:
     JThreadWrapper(F&& func, Args&&... args)
-        : threadId_{threadCounter}
+        : threadId_{ threadCounter }
     {
         sync_cout << "constructed thread with id: " << threadId_ << "\n";
         thread_ = std::jthread(std::forward<F>(func), std::forward<Args>(args)...);
@@ -141,8 +134,8 @@ public:
     }
 
 private:
-    const uint32_t threadId_{};
-    std::jthread thread_{};
+    const uint32_t         threadId_{};
+    std::jthread           thread_{};
     static inline uint32_t threadCounter{ 1U };
 };
 
@@ -178,6 +171,35 @@ void yield_func()
     std::jthread t1(work, "t1");
     std::jthread t2(work, "t2");
 }
+
+class Counter
+{
+public:
+    Counter() = default;
+
+    void start()
+    {
+        while (running_.load())
+        {
+            ++counter_;
+            std::this_thread::sleep_for(1s);
+        }
+    }
+
+    void stop()
+    {
+        running_.store(false);
+    }
+
+    uint32_t get()
+    {
+        return counter_;
+    }
+
+private:
+    std::atomic<bool> running_{true};
+    uint32_t counter_{};
+};
 
 int main()
 {
@@ -215,18 +237,20 @@ int main()
 
     sync_cout << "Result: " << result << std::endl;
 
-    auto t6 = std::thread([](){
-        for (int i : std::views::iota(1, 100))
+    auto t6 = std::thread(
+        []()
         {
-            sync_cout << i << "\n";
-        }
-    });
+            for (int i : std::views::iota(1, 100))
+            {
+                sync_cout << i << "\n";
+            }
+        });
 
-    auto t7 = std::move(t6);    
+    auto t7 = std::move(t6);
 
     t7.join();
 
-    //Check if threads are joinable
+    // Check if threads are joinable
     joinable();
 
     auto t8 = std::thread(deamonThread);
@@ -234,10 +258,7 @@ int main()
 
     std::this_thread::sleep_for(3s);
 
-
-    std::jthread t9([]() {
-        sync_cout << "Hello from jthread\n";
-    });
+    std::jthread t9([]() { sync_cout << "Hello from jthread\n"; });
 
     t9.join();
 
@@ -247,8 +268,21 @@ int main()
     auto jt3 = JThreadWrapper([]() { sync_cout << "Hello from jt3\n"; });
 
     std::cout << "________________\n";
-    //Using std::this_thread::yield
-    yield_func();
+    // Using std::this_thread::yield
+    // yield_func();
+
+
+    // Counter class
+    Counter counter{};
+
+    {
+        std::jthread counterThread = std::jthread([counterRef = std::ref(counter)]() { counterRef.get().start(); });
+
+        std::this_thread::sleep_for(5s);
+        counter.stop();
+    }
+
+    std::print("Counter is equal to: {}\n", counter.get());
 
     return 0;
 }
