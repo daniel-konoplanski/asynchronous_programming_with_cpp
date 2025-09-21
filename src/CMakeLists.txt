@@ -1,1 +1,1 @@
-add_executable(main main.cpp)
+add_subdirectory(chapter_3)
