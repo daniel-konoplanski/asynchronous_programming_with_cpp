@@ -1,5 +1,6 @@
 #include <iostream>
 #include <print>
+#include <ranges>
 #include <sstream>
 #include <syncstream>
 #include <thread>
@@ -119,6 +120,17 @@ int main()
     t5.join();
 
     sync_cout << "Result: " << result << std::endl;
+
+    auto t6 = std::thread([](){
+        for (int i : std::views::iota(1, 100))
+        {
+            sync_cout << i << "\n";
+        }
+    });
+
+    auto t7 = std::move(t6);    
+
+    t7.join();
 
     return 0;
 }
