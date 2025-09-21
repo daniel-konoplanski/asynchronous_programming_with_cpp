@@ -1,9 +1,12 @@
+#include <functional>
 #include <iostream>
 #include <print>
 #include <ranges>
 #include <sstream>
 #include <syncstream>
 #include <thread>
+#include <unistd.h>
+#include <utility>
 
 using namespace std::chrono_literals;
 
@@ -85,6 +88,64 @@ void setValue(int& result) {
     result = 1 + (rand () % 10);
 }
 
+void joinable()
+{
+    std::thread t1;
+
+    std::cout << "Is t1 joinable? " << t1.joinable()
+              << std::endl;
+
+    std::thread t2([](){
+        std::this_thread::sleep_for(100ms);
+    });
+
+    t1.swap(t2);
+
+    std::cout << "Is t1 joinable? " << t1.joinable()
+              << std::endl;
+
+    std::cout << "Is t2 joinable? " << t2.joinable()
+              << std::endl;
+
+    t1.join();
+
+    std::cout << "Is t1 joinable? " << t1.joinable()
+              << std::endl;
+}
+
+void deamonThread()
+{
+    sync_cout << "starting deamon thread\n";
+
+    std::this_thread::sleep_for(2s);
+
+    sync_cout << "finishing deamon thread\n";
+}
+
+template <typename F, typename... Args>
+class JThreadWrapper
+{
+public:
+    JThreadWrapper(F&& func, Args&&... args)
+        : threadId_{threadCounter}
+    {
+        sync_cout << "constructed thread with id: " << threadId_ << "\n";
+        thread_ = std::jthread(std::forward<F>(func), std::forward<Args>(args)...);
+        ++threadCounter;
+    }
+
+    ~JThreadWrapper()
+    {
+        sync_cout << "destoyed thread with id: " << threadId_ << "\n";
+    }
+
+private:
+    const uint32_t threadId_{};
+    std::jthread thread_{};
+    static inline uint32_t threadCounter{1U};
+};
+
+
 int main()
 {
     std::thread t1(func);
@@ -131,6 +192,27 @@ int main()
     auto t7 = std::move(t6);    
 
     t7.join();
+
+    //Check if threads are joinable
+    joinable();
+
+    auto t8 = std::thread(deamonThread);
+    t8.detach();
+
+    std::this_thread::sleep_for(3s);
+
+
+    std::jthread t9([]() {
+        sync_cout << "Hello from jthread\n";
+    });
+
+    t9.join();
+
+    sync_cout << "________________________\n";
+
+    auto jt1 = JThreadWrapper([]() { sync_cout << "Hello from jt1\n"; });
+    auto jt2 = JThreadWrapper([]() { sync_cout << "Hello from jt2\n"; });
+    auto jt3 = JThreadWrapper([]() { sync_cout << "Hello from jt3\n"; });
 
     return 0;
 }
