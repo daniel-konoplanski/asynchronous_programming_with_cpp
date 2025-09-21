@@ -1,5 +1,6 @@
 #include <functional>
 #include <iostream>
+#include <mutex>
 #include <print>
 #include <ranges>
 #include <sstream>
@@ -142,9 +143,41 @@ public:
 private:
     const uint32_t threadId_{};
     std::jthread thread_{};
-    static inline uint32_t threadCounter{1U};
+    static inline uint32_t threadCounter{ 1U };
 };
 
+std::mutex mtx{};
+
+void yield_func()
+{
+    auto work = [&](const std::string& name)
+    {
+        while (true)
+        {
+            bool work_to_do = rand() % 2;
+
+            if (work_to_do)
+            {
+                sync_cout << name << ": working\n";
+
+                std::lock_guard<std::mutex> lock(mtx);
+
+                for (auto start = std::chrono::steady_clock::now(), now = start; now < start + 3s;
+                     now = std::chrono::steady_clock::now())
+                {
+                }
+            }
+            else
+            {
+                sync_cout << name << ": yielding\n";
+                std::this_thread::yield();
+            }
+        }
+    };
+
+    std::jthread t1(work, "t1");
+    std::jthread t2(work, "t2");
+}
 
 int main()
 {
@@ -208,11 +241,14 @@ int main()
 
     t9.join();
 
-    sync_cout << "________________________\n";
-
+    // Using the JThreadWrapper
     auto jt1 = JThreadWrapper([]() { sync_cout << "Hello from jt1\n"; });
     auto jt2 = JThreadWrapper([]() { sync_cout << "Hello from jt2\n"; });
     auto jt3 = JThreadWrapper([]() { sync_cout << "Hello from jt3\n"; });
+
+    std::cout << "________________\n";
+    //Using std::this_thread::yield
+    yield_func();
 
     return 0;
 }
