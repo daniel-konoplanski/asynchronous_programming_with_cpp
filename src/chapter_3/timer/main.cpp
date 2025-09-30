@@ -6,6 +6,11 @@
 
 using namespace std::chrono_literals;
 
+void func()
+{
+    std::osyncstream(std::cout) << "Doing some stuff in the callback 2\n";
+}
+
 int main()
 {
     auto timer = timer::Timer([]() { std::osyncstream(std::cout) << "Doing some stuff in the callback\n"; });
@@ -16,6 +21,8 @@ int main()
     timer.stop();
 
     std::this_thread::sleep_for(2s);
+
+    auto timer2 = timer::Timer(func);
 
     return 0;
 }

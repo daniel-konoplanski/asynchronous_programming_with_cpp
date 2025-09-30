@@ -7,14 +7,15 @@
 #include <stop_token>
 #include <syncstream>
 #include <thread>
+#include <utility>
 
 namespace timer
 {
 
 template <typename F, typename... Args>
     requires std::invocable<F, Args...>
-Timer<F, Args...>::Timer(F&& callback, Args... args)
-    : callback_{ std::bind_front(callback, args...) }
+Timer<F, Args...>::Timer(F&& callback, Args&&... args)
+    : callback_{ std::bind_front(callback, std::forward(args)...) }
 {
 }
 

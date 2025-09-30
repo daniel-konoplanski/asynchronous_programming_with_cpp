@@ -13,7 +13,7 @@ requires std::invocable<F, Args...>
 class Timer
 {
 public:
-    Timer(F&& callback, Args... args);
+    Timer(F&& callback, Args&&... args);
 
 public:
     void start(std::chrono::microseconds interval);
