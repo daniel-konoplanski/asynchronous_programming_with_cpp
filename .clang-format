@@ -3,7 +3,7 @@ IndentWidth: 4
 BreakBeforeBraces: Allman
 AllowShortIfStatementsOnASingleLine: WithoutElse
 NamespaceIndentation: None
-FixNamespaceComments: false
+FixNamespaceComments: true
 AllowAllConstructorInitializersOnNextLine: true
 BreakConstructorInitializers: BeforeComma
 AllowShortBlocksOnASingleLine: Never

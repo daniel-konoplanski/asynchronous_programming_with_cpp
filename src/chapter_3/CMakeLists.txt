@@ -1,3 +1,5 @@
 add_executable(chapter_3 main.cpp)
 add_subdirectory(stop_token)
 add_subdirectory(excpetions)
+add_subdirectory(thread_local)
+add_subdirectory(timer)
