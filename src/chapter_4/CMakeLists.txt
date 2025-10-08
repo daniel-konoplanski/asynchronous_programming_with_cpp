@@ -1,2 +1,4 @@
 add_subdirectory(counter)
 add_subdirectory(recursive_mutex)
+add_subdirectory(shared_mutex)
+add_subdirectory(lock_guard)
