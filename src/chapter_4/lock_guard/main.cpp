@@ -13,7 +13,6 @@ void function_throws()
 
 int main()
 {
-
     auto worker = []
     {
         for (int i = 0; i < 1000000; ++i)
