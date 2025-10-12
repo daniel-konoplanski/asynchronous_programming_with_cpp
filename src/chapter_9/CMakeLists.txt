@@ -1,3 +1,4 @@
 add_subdirectory(asio_timer)
 add_subdirectory(background_task)
 add_subdirectory(async)
+add_subdirectory(error_handling)
