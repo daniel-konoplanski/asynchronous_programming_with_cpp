@@ -1,24 +1,40 @@
+#include <boost/asio.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/post.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/system/detail/error_code.hpp>
-#include <boost/asio.hpp>
 
 #include <print>
+#include <thread>
 
 using namespace std::chrono_literals;
 
-void onTimeout(const boost::system::error_code& ec)
+void backgroundTask(boost::asio::io_context& ioContext)
 {
-    std::print("Timer timed out with code {}\n", ec.to_string());
+    std::this_thread::sleep_for(2s);
+
+    std::print("Posting background task\n");
+
+    auto performWork = []() {
+        std::this_thread::sleep_for(1s);
+        std::print("Doing some work\n");
+        std::this_thread::sleep_for(1s);
+    };
+
+    boost::asio::post(ioContext, performWork);
 }
 
 int main()
 {
     boost::asio::io_context ioContext{};
-    boost::asio::steady_timer timer{ioContext, 2s};
 
-    timer.async_wait(&onTimeout);
+    auto workGuard = boost::asio::make_work_guard(ioContext);
+
+    backgroundTask(ioContext);
     ioContext.run();
+
+    workGuard.reset();
 
     return 0;
 }

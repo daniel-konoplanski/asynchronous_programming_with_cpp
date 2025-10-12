@@ -1,3 +1,3 @@
-add_executable(asio_timer main.cpp)
+add_executable(background_task main.cpp)
 
-target_link_libraries(asio_timer PRIVATE Boost::asio Boost::system)
+target_link_libraries(background_task PRIVATE Boost::asio Boost::system)
