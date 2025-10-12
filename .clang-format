@@ -5,6 +5,7 @@ BraceWrapping:
   AfterFunction: true
   BeforeLambdaBody: false
 AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLambdasOnASingleLine: Empty
 NamespaceIndentation: None
 FixNamespaceComments: true
 AllowAllConstructorInitializersOnNextLine: true
