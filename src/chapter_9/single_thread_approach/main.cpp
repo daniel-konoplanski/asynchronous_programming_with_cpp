@@ -13,15 +13,19 @@ int main()
     boost::asio::io_context io{};
 
     boost::asio::steady_timer st1(io, 2s);
-    boost::asio::steady_timer st2(io, 5s);
+    boost::asio::steady_timer st2(io, 3s);
 
-    st1.async_wait([](const boost::system::error_code& ec) {
-        std::print("st1 run out with code {}\n", ec.to_string());
-    });
+    st1.async_wait(
+        [](const boost::system::error_code& ec)
+        {
+            std::print("st1 run out with code {}\n", ec.to_string());
+        });
 
-    st2.async_wait([](const boost::system::error_code& ec) {
-        std::print("st2 run out with code {}\n", ec.to_string());
-    });
+    st2.async_wait(
+        [](const boost::system::error_code& ec)
+        {
+            std::print("st2 run out with code {}\n", ec.to_string());
+        });
 
     io.run();
 }
