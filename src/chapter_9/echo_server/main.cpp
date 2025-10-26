@@ -1,5 +1,8 @@
 #include <array>
+#include <boost/asio/write_at.hpp>
+#include <cstddef>
 #include <cstdint>
+#include <iostream>
 #include <memory>
 
 #include <boost/asio.hpp>
@@ -36,7 +39,15 @@ private:
                 if (!ec) do_write(length);
             });
     }
-    void do_write(uint32_t length);
+
+    void do_write(uint32_t length)
+    {
+        auto self{ shared_from_this() };
+        boost::asio::async_write(socket_, boost::asio::buffer(data_, length),
+        [this, self](boost::system::error_code ec, std::size_t) {
+            if (!ec) do_read();
+        });
+    }
 
 private:
     static constexpr uint32_t max_length{ 1024 };
@@ -78,7 +89,21 @@ private:
 
 int main()
 {
-    std::shared_ptr<IoContextPtr> io{ std::make_shared<IoContextPtr>() };
+    IoContextPtr io{ std::make_shared<boost::asio::io_context>() };
+
+    std::cout << "Starting server...\n";
+
+    try
+    {
+        EchoServer server(io);
+        io->run();
+    }
+    catch (std::exception& e)
+    {
+        std::cout << "Exception: " << e.what() << "\n";
+    }
+
+    std::cout << "Exiting...\n";
 
     return 0;
 }
