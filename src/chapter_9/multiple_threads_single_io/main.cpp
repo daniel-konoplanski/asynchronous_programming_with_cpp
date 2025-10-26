@@ -15,7 +15,8 @@ using namespace std::chrono_literals;
 
 void background_task(boost::asio::io_context& io, int task_id)
 {
-    boost::asio::post(io,
+    boost::asio::post(
+        io,
         [task_id]()
         {
             sync_cout << "Task " << task_id << " is being handled in thread " << std::this_thread::get_id()
