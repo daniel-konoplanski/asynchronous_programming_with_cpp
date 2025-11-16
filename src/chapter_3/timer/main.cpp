@@ -1,6 +1,7 @@
 #include "timer/Timer.hpp"
 
 #include <iostream>
+#include <memory>
 #include <syncstream>
 #include <thread>
 
