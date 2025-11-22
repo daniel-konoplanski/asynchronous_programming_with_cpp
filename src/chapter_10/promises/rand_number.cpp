@@ -39,7 +39,7 @@ boost::cobalt::main co_main(int, char**)
 
     std::println("step2");
 
-    std::println("Result: {}", co_await result);
+    std::println("Result: {}", result.get());
 
     std::println("_____________________");
 
