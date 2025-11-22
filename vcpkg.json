@@ -6,6 +6,10 @@
         {
             "name": "boost-asio",
             "version>=": "1.89.0"
+        },
+        {
+            "name": "boost-cobalt",
+            "version>=": "1.89.0"
         }
     ]
 }

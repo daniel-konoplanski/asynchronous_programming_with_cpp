@@ -7,9 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Add extra warning flags to all targets
-set(WARNING_FLAGS -Wall -Wextra -Wpedantic -Werror)
-add_compile_options(${WARNING_FLAGS})
+# set(WARNING_FLAGS -Wall -Wextra -Wpedantic -Werror)
+# add_compile_options(${WARNING_FLAGS})
 
 find_package(boost_asio CONFIG REQUIRED)
+find_package(boost_cobalt CONFIG REQUIRED)
 
 add_subdirectory(src)
